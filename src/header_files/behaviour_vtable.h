@@ -24,6 +24,7 @@
         SteeringOutput *(*evade)(GameCharacter *self, MovementInfo *blob);
         SteeringOutput *(*face)(GameCharacter *self, MovementInfo *blob);
         SteeringOutput *(*path_following)(GameCharacter *self, MovementInfo *blob);
+        SteeringOutput *(*separation)(GameCharacter *self, MovementInfo *blob);
     } BehaviourVTable;
 
 #endif

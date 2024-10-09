@@ -561,7 +561,7 @@ SteeringOutput *enemy_evasion(GameCharacter *instance, MovementInfo *blob) {
 
     //Correct it using evasion algorithm
     for (int i = 0; i < evasion->target_count; i++) {
-        FloatVector *target_pos = evasion->targets[i]->position;
+        FloatVector *target_pos = evasion->targets[i]->movement->position;
         FloatVector *direction = target_pos->methods->sub_ret(target_pos, instance->movement->position);
         float distance = direction->methods->norm(direction);
 
@@ -590,5 +590,6 @@ const BehaviourVTable enemy_vtable = {
     .evade = enemy_delegated_behaviour_evade,
     .face = enemy_face,
     .path_following = enemy_path_following,
-    .dynamic_wander = enemy_dynamic_wandering
+    .dynamic_wander = enemy_dynamic_wandering,
+    .separation = enemy_evasion
 };

@@ -1,6 +1,7 @@
 #include "../header_files/game_character.h"
 #include "../header_files/path.h"
 #include "../header_files/wander_target.h"
+#include "../header_files/evasion.h"
 #include <stdlib.h>
 
 typedef struct {
@@ -173,6 +174,11 @@ Enemy *new_enemy(unsigned int health, float radius, EnemyBehaviour behaviour, vo
             new_instance->current_behaviour = enemy_vtable.path_following;
             char *path_name = (char *)misc;
             new_instance->movement_aux = (void *)new_path(path_name);
+            break;
+        case Separation:
+            new_instance->current_behaviour = enemy_vtable.separation;
+            EvasionCreateBlob *blob = (EvasionCreateBlob *)misc;
+            new_instance->movement_aux = (void *)new_evasion(blob);
             break;
         default:
             new_instance->current_behaviour = enemy_vtable.wander;

@@ -8,24 +8,17 @@
  * characters from the world who will be members of the
  * separation group. Returns NULL on error.
  */
-Evasion *new_evasion(GameCharacter **members, unsigned int member_count) {
+Evasion *new_evasion(EvasionCreateBlob *blob) {
     Evasion *new_instance = (Evasion *)malloc(sizeof(Evasion));
     if (new_instance == NULL) {
         return NULL;
     }
 
-    Kinematic **new_instance_members = (Kinematic **)malloc(sizeof(Kinematic *) * member_count);
-    if (new_instance_members == NULL) {
-        free(new_instance);
-        return NULL;
-    }
-
-    for (unsigned int i = 0; i < member_count; i++) {
-        new_instance_members[i] = members[i]->movement;
-    }
-
+    new_instance->targets = blob->targets;
+    new_instance->vel_match_target = blob->vel_match_target;
+    new_instance->target_count = blob->target_count;
     new_instance->decay_coefficient = 0.5f;
-    new_instance->thresshold = 1.0f;
+    new_instance->thresshold = 0.35f;
 
     return new_instance;
 }

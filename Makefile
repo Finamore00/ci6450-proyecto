@@ -16,7 +16,8 @@ main: target manager
 	game_character.o,\
 	game_manager.o,\
 	path.o,\
-	wander_target.o} $(SRC_DIR)/main.c -o $(TARGET_DIR)/Game
+	wander_target.o,\
+	evasion.o} $(SRC_DIR)/main.c -o $(TARGET_DIR)/Game
 
 sdl: target
 	$(CC) $(GCC_FLAGS) -c $(SRC_DIR)/sdl_manager.c -o $(TARGET_DIR)/sdl_manager.o
@@ -45,10 +46,13 @@ behaviours: target vector kinematic static steering
 path: target vector kinematic static sdl
 	$(CC) $(GCC_FLAGS) -c $(SRC_DIR)/path.c -o $(TARGET_DIR)/path.o
 
-wander_target:
+wander_target: target
 	$(CC) $(GCC_FLAGS) -c $(SRC_DIR)/wander_target.c -o $(TARGET_DIR)/wander_target.o
 
-manager: target vector kinematic static steering sdl characters path wander_target
+separation: target vector kinematic characters static sdl 
+	$(CC) $(GCC_FLAGS) -c $(SRC_DIR)/evasion.c -o $(TARGET_DIR)/evasion.o
+
+manager: target vector kinematic static steering sdl characters path wander_target separation
 	$(CC) $(GCC_FLAGS) -c $(SRC_DIR)/game_manager.c -o $(TARGET_DIR)/game_manager.o
 
 target:

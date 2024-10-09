@@ -4,7 +4,7 @@
     #include "kinematic.h"
     #include "game_character.h"
     typedef struct Evasion_s {
-        Kinematic **targets;
+        GameCharacter **targets;
         Kinematic *vel_match_target;
         unsigned int target_count;
         float thresshold;
@@ -12,12 +12,12 @@
     } Evasion;
 
     typedef struct EvasionCreateBlob_s {
-        Kinematic **targets;
+        GameCharacter **targets;
         Kinematic *vel_match_target;
         unsigned int target_count;
     } EvasionCreateBlob;
 
-    Evasion *new_evasion(GameCharacter **members, unsigned int member_count);
+    Evasion *new_evasion(EvasionCreateBlob *blob);
     void destroy_evasion(Evasion *);
 
 #endif

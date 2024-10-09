@@ -151,6 +151,40 @@ void create_enemies_demo_path_following(GameManager *instance) {
 }
 
 /**
+ * Function that takes in a GameManager instance under creation and 
+ * adds to it the necessary enemy characters for the Separation demo.
+ * The Separation demo contains:
+ * 
+ *  - 10 characters that perform velocity matching against the player
+ *    while remaining separated between each other
+ */
+void create_enemies_demo_separation(GameManager *instance) {
+    instance->enemy_count = 10;
+    instance->enemies = (GameCharacter **)malloc(sizeof(GameCharacter *) * instance->enemy_count);
+
+    EvasionCreateBlob aux_info = {
+        .target_count = instance->enemy_count,
+        .targets = instance->enemies,
+        .vel_match_target = instance->player->movement
+    };
+
+    printf("EnemyCreateBlob: %d, %p, %p", aux_info.target_count, (void *)aux_info.targets, (void *)aux_info.vel_match_target);
+
+    instance->enemies[0] = new_character_enemy(-4.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 100, 0.0f, Separation, (void *)&aux_info);
+    instance->enemies[1] = new_character_enemy(-4.1f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 100, 0.0f, Separation, (void *)&aux_info);
+    instance->enemies[2] = new_character_enemy(-3.7f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 100, 0.0f, Separation, (void *)&aux_info);
+    instance->enemies[3] = new_character_enemy(-3.3f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 100, 0.0f, Separation, (void *)&aux_info);
+    instance->enemies[4] = new_character_enemy(-4.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 100, 0.0f, Separation, (void *)&aux_info);
+    instance->enemies[5] = new_character_enemy(-3.9f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 100, 0.0f, Separation, (void *)&aux_info);
+    instance->enemies[6] = new_character_enemy(-3.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 100, 0.0f, Separation, (void *)&aux_info);
+    instance->enemies[7] = new_character_enemy(-4.1f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 100, 0.0f, Separation, (void *)&aux_info);
+    instance->enemies[8] = new_character_enemy(-3.7f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 100, 0.0f, Separation, (void *)&aux_info);
+    instance->enemies[9] = new_character_enemy(-3.9f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 100, 0.0f, Separation, (void *)&aux_info);
+
+    return;
+}
+
+/**
  * ##################################################################
  * ####################### the actual stuff #########################
  * ##################################################################
@@ -193,10 +227,11 @@ int game_manager_update_enemies(GameManager *instance, double time_delta) {
             case DynamicWander:
             case Pursue:
             case Evade:
+            case Separation:
                 target = (MovementInfo *)curr_enemy->enemy_info->movement_aux;
                 break;
         };
-        SteeringOutput *movement_correction = curr_enemy->enemy_info->current_behaviour(curr_enemy, (MovementInfo *)target);
+        SteeringOutput *movement_correction = curr_enemy->enemy_info->current_behaviour(curr_enemy, target);
         if (erase_static) {
             destroy_static((Static *)target);
         }
@@ -352,6 +387,8 @@ GameManager *new_game_manager(char *demo_name) {
         create_enemies_demo_dynamic_wandering(new_instance);
     } else if (!strcmp(demo_name, "path-following")) {
         create_enemies_demo_path_following(new_instance);
+    } else if (!strcmp(demo_name, "evasion")) {
+        create_enemies_demo_separation(new_instance);
     } else {
         return NULL;
     }
