@@ -192,6 +192,10 @@ Enemy *new_enemy(unsigned int health, float radius, EnemyBehaviour behaviour, vo
 /**
  * Method that frees all memory allocated to an Enemy struct 
  * instance.
+ * 
+ * Note: Right now it has some pretty bad memory leaks due to
+ * the modifications to enemy structs and auxiliar data things.
+ * Will correct it eventually.
  */
 void destroy_enemy(Enemy *instance) {
     if (instance == NULL) {
