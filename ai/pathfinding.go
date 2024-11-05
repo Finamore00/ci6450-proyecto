@@ -33,6 +33,7 @@ when switching path-finding targets.
 */
 func (p *PathFinding) ClearPath() {
 	p.path = nil
+	p.currObjPos = -1
 }
 
 /*
@@ -53,24 +54,25 @@ func (p *PathFinding) FollowPath() *movement.SteeringOutput {
 
 	//If already at goal node do nothing
 	currChNode := p.mapData.GetTileNode(p.character.Position)
-	gNode := p.mapData.GetTileNode(*p.target)
-	if currChNode == gNode {
-		return nil
-	}
 
 	//If we're already at the current target node, switch to the next node in the path
-	if currChNode == p.mapData.GetTileNode(p.path[p.currObjPos]) {
+	if currChNode == p.mapData.GetTileNode(p.path[p.currObjPos]) && p.currObjPos > 0 {
 		p.currObjPos -= 1
 	}
 
 	//Build Seek target for steering output
-	skTgt := movement.Kinematic{
+	stTgt := movement.Kinematic{
 		Position:    p.path[p.currObjPos],
 		Velocity:    vector.Vector{X: 0, Z: 0},
 		Orientation: 0,
 		Rotation:    0,
 	}
 
-	return NewDynamicSeekFlee(p.character, &skTgt, true).GetSteering()
+	//If reaching the final point in the path, use Dynamic arrive instead of seek
+	if p.currObjPos == 0 {
+		return NewDynamicArriver(p.character, &stTgt).GetSteering()
+	}
+
+	return NewDynamicSeekFlee(p.character, &stTgt, true).GetSteering()
 
 }

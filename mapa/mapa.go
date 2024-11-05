@@ -174,7 +174,9 @@ func (m *Map) getConnections(node tileNode) []connection {
 }
 
 /*
-Given two points in the game map, finds a path between start and end using A*
+Given two points in the game map, finds a path between start and end using A*.
+For performance reasons the returned path is reversed, so to go from start to
+goal it must be followed in reverse.
 */
 func (m *Map) FindPath(start vector.Vector, end vector.Vector) []vector.Vector {
 
