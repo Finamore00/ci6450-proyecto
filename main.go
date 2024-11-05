@@ -16,8 +16,8 @@ func main() {
 
 	//Set game objects
 	g.Map.AddObstacle(vector.New(5, 2), 4, 1)
-	g.Enemies = append(g.Enemies, enemy.NewDynamicWanderer())
-	g.Enemies[0].SetPosition(0, -3)
+	g.Enemies = append(g.Enemies, enemy.NewPathFinder(g.Map, &vector.Vector{X: 7.6, Z: -2.4}))
+	g.Enemies[0].SetPosition(-5, 2)
 
 	//Register objects in physics manager
 	g.Physics.RegisterObject(g.Player)
@@ -42,7 +42,6 @@ func main() {
 		g.Physics.CheckCollisions()
 		g.Graphics.Clear()
 		g.UpdateGraphics()
-
 		g.Graphics.Render()
 	}
 }

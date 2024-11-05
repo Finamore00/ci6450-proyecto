@@ -2,6 +2,7 @@ package enemy
 
 import (
 	"ci6450-proyecto/ai"
+	"ci6450-proyecto/mapa"
 	"ci6450-proyecto/movement"
 	"ci6450-proyecto/physics"
 	"ci6450-proyecto/sdlmgr"
@@ -24,7 +25,7 @@ type Enemy struct {
 	Movement              *movement.Kinematic
 	Collider              *physics.Collider
 	steeringBehaviourData ai.SteeringBehaviour
-	pathfinderData        *any //Implement path finder later
+	pathfinderData        *ai.PathFinding //Implement path finder later
 }
 
 /*
@@ -80,6 +81,8 @@ func (e *Enemy) EnactBehaviour(t float64) {
 	switch e.kind {
 	case Steerer:
 		e.Movement.Update(e.steeringBehaviourData.GetSteering(), t)
+	case Pathfinder:
+		e.Movement.Update(e.pathfinderData.FollowPath(), t)
 	default:
 	}
 }
@@ -287,6 +290,25 @@ func NewDynamicWanderer() *Enemy {
 	}
 	newInstance.steeringBehaviourData = ai.NewDynamicWander(newInstance.Movement)
 	newInstance.pathfinderData = nil
+
+	return &newInstance
+}
+
+/*
+New Path finding enemy constructor
+*/
+func NewPathFinder(mapData *mapa.Map, target *vector.Vector) *Enemy {
+	var newInstance Enemy
+
+	newInstance.kind = Pathfinder
+	newInstance.Movement = movement.NewKinematic()
+	newInstance.Collider = &physics.Collider{
+		Position: &newInstance.Movement.Position,
+		Width:    14,
+		Height:   14, //Remember to correct these :)
+	}
+	newInstance.steeringBehaviourData = nil
+	newInstance.pathfinderData = ai.NewPathFinding(newInstance.Movement, mapData, target)
 
 	return &newInstance
 }

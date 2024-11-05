@@ -176,7 +176,7 @@ func (m *Map) getConnections(node tileNode) []connection {
 /*
 Given two points in the game map, finds a path between start and end using A*
 */
-func (m *Map) FindPath(start vector.Vector, end vector.Vector) map[tileNode]tileNode {
+func (m *Map) FindPath(start vector.Vector, end vector.Vector) []vector.Vector {
 
 	//Discretize inputted locations
 	stNode := m.GetTileNode(start)
@@ -237,7 +237,13 @@ func (m *Map) FindPath(start vector.Vector, end vector.Vector) map[tileNode]tile
 
 		//If goal node was reached. Return predecesor map
 		if current == gNode {
-			return predecesors
+			//Build path with concrete map coordinates of nodes
+			path := make([]vector.Vector, 0, 500)
+			path = append(path, m.GetNodeCoord(gNode))
+			for curr, hasPred := predecesors[gNode]; hasPred; curr, hasPred = predecesors[curr] {
+				path = append(path, m.GetNodeCoord(curr))
+			}
+			return path
 		}
 
 		//Remove current node from open set

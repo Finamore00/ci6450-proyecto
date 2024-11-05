@@ -10,6 +10,11 @@ type ObjectType int32
 const (
 	WALL = iota
 	PLAYER
+	MINER
+	COLLECTER
+	MEDIC
+	DEPOSIT
+	KART
 )
 
 type PhysicsObject interface {
