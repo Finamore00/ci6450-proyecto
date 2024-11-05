@@ -45,8 +45,8 @@ func (d *DepositKart) SetPosition(x float64, z float64) {
 func (d *DepositKart) GetCollider() *physics.Collider {
 	return &physics.Collider{
 		Position: d.Position,
-		Width:    0.3,
-		Height:   0.2,
+		Width:    0.4,
+		Height:   0.32,
 	}
 }
 
@@ -66,8 +66,8 @@ func (d *DepositKart) Draw(s *sdlmgr.SDLManager) {
 	renderer.FillRect(&sdl.Rect{
 		X: spritePos.X,
 		Y: spritePos.Z,
-		W: 20,
-		H: 14,
+		W: 25,
+		H: 20,
 	})
 	renderer.SetDrawColor(0x00, 0x00, 0x00, 0x00)
 }

@@ -12,10 +12,12 @@ const (
 	PLAYER
 	ENEMY
 	MINER
-	COLLECTER
+	COLLECTOR
 	MEDIC
 	DEPOSIT
 	KART
+	STORAGE
+	WATER
 )
 
 type PhysicsObject interface {

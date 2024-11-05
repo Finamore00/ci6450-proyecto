@@ -58,6 +58,10 @@ func (g *GameManager) ProcessInput() {
 Update player state
 */
 func (g *GameManager) UpdatePlayer(dt float64) {
+	if g.Player == nil {
+		return
+	}
+
 	keys := g.Graphics.GetInput()
 	anyInput := false
 
@@ -97,6 +101,26 @@ func (g *GameManager) UpdateEnemies(dt float64) {
 	for _, e := range g.Enemies {
 		e.EnactBehaviour(dt)
 	}
+}
+
+/*
+Registers all Entities and game objects to the physics manager
+*/
+func (g *GameManager) RegisterObjects() {
+	if g.Player != nil {
+		g.Physics.RegisterObject(g.Player)
+	}
+
+	for _, e := range g.Enemies {
+		g.Physics.RegisterObject(e)
+	}
+
+	for _, o := range g.Objects {
+		g.Physics.RegisterObject(o)
+	}
+
+	g.Map.RegisterObjects(g.Physics)
+
 }
 
 /*

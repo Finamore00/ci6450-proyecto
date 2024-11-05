@@ -97,8 +97,11 @@ func (m *Miner) OnCollision(other physics.PhysicsObject) {
 			fmt.Fprintln(os.Stderr, "object isn't pointer to kart.")
 			return
 		}
-		m.loaded = false
-		kp.Load += 1
+
+		if m.loaded {
+			m.loaded = false
+			kp.Load += 1
+		}
 	case physics.WALL:
 		//Wall collisions
 		mc := m.GetCollider()
@@ -222,8 +225,8 @@ func (m *Miner) EnactBehaviour(dt float64) {
 		m.Movement.Update(m.pathFinding.FollowPath(), dt)
 		m.stamina -= 0.0001
 	} else {
+		//If deposit is active go towards it
 		if m.deposit.Enabled {
-			//If deposit is active go towards it
 			if !m.goingToDeposit {
 				m.pathFinding.SetTarget(m.deposit.Location)
 				m.goingToDeposit = true

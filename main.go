@@ -15,24 +15,29 @@ func main() {
 	g := game.New()
 	g.Graphics.Init()
 
+	//Set walls
+	g.Map.AddObstacle(vector.New(5, 2), 4, 1)
+
 	//Set game objects
 	kart := objects.NewDepositKart()
 	deposit := objects.NewMineralDeposit()
-	deposit.Enabled = true
-	g.Map.AddObstacle(vector.New(5, 2), 4, 1)
+	storage := objects.NewMineralStorage()
+
 	g.Objects = append(g.Objects, kart)
 	g.Objects[0].SetPosition(0.3, -4.7)
 	g.Objects = append(g.Objects, deposit)
 	g.Objects[1].SetPosition(7, -1)
+	g.Objects = append(g.Objects, storage)
+	g.Objects[2].SetPosition(-9.3, 5.0)
+
+	//Set game characters
 	g.Enemies = append(g.Enemies, enemy.NewMiner(g.Map, kart, deposit))
-	g.Enemies[0].SetPosition(-3, 4)
+	g.Enemies[0].SetPosition(-4, -3.2)
+	g.Enemies = append(g.Enemies, enemy.NewCollector(g.Map, kart, storage))
+	g.Enemies[1].SetPosition(-8, -3.4)
 
 	//Register objects in physics manager
-	g.Physics.RegisterObject(g.Player)
-	g.Physics.RegisterObject(g.Enemies[0])
-	g.Physics.RegisterObject(g.Objects[0])
-	g.Physics.RegisterObject(g.Objects[1])
-	g.Map.RegisterObjects(g.Physics)
+	g.RegisterObjects()
 
 	//Initiate RNG
 	rand.Seed(time.Now().UnixNano())

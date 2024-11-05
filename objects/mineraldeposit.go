@@ -21,7 +21,7 @@ type MineralDeposit struct {
 
 func NewMineralDeposit() *MineralDeposit {
 	return &MineralDeposit{
-		Enabled:      false,
+		Enabled:      true,
 		Location:     vector.New(0, 0),
 		lastDisabled: 0,
 	}
@@ -46,8 +46,8 @@ func (m *MineralDeposit) GetVelocity() vector.Vector {
 func (m *MineralDeposit) GetCollider() *physics.Collider {
 	return &physics.Collider{
 		Position: m.Location,
-		Width:    0.3,
-		Height:   0.3,
+		Width:    0.4,
+		Height:   0.4,
 	}
 }
 
@@ -76,8 +76,8 @@ func (m *MineralDeposit) Draw(s *sdlmgr.SDLManager) {
 	renderer.FillRect(&sdl.Rect{
 		X: pixPos.X,
 		Y: pixPos.Z,
-		W: 20,
-		H: 20,
+		W: 25,
+		H: 25,
 	})
 	renderer.SetDrawColor(0x00, 0x00, 0x00, 0x00)
 }

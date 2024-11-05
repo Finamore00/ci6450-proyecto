@@ -37,8 +37,8 @@ func New() *Player {
 
 	newInstance.collider = &physics.Collider{
 		Position: &newInstance.Movement.Position,
-		Width:    0.175, //Check player dimmensions later
-		Height:   0.175,
+		Width:    0.22, //Check player dimmensions later
+		Height:   0.22,
 	}
 
 	return &newInstance
