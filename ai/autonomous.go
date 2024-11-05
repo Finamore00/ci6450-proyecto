@@ -6,5 +6,5 @@ import (
 
 type AutonomousEntity interface {
 	physics.PhysicsObject
-	EnactBehaviour()
+	EnactBehaviour(dt float64)
 }

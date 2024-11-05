@@ -4,6 +4,8 @@ import (
 	"ci6450-proyecto/physics"
 	"ci6450-proyecto/sdlmgr"
 	"ci6450-proyecto/vector"
+
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 /*
@@ -12,9 +14,17 @@ random places in the map for miners to collect
 */
 type MineralDeposit struct {
 	physics.PhysicsObject
-	enabled  bool
-	location *vector.Vector
-	collider physics.Collider
+	Enabled      bool
+	Location     *vector.Vector
+	lastDisabled uint64
+}
+
+func NewMineralDeposit() *MineralDeposit {
+	return &MineralDeposit{
+		Enabled:      false,
+		Location:     vector.New(0, 0),
+		lastDisabled: 0,
+	}
 }
 
 /*
@@ -26,7 +36,7 @@ func (m *MineralDeposit) GetType() physics.ObjectType {
 }
 
 func (m *MineralDeposit) GetPosition() vector.Vector {
-	return *m.location
+	return *m.Location
 }
 
 func (m *MineralDeposit) GetVelocity() vector.Vector {
@@ -34,15 +44,40 @@ func (m *MineralDeposit) GetVelocity() vector.Vector {
 }
 
 func (m *MineralDeposit) GetCollider() *physics.Collider {
-	return &m.collider
+	return &physics.Collider{
+		Position: m.Location,
+		Width:    0.3,
+		Height:   0.3,
+	}
 }
 
-func (m *MineralDeposit) OnCollision() {
-	m.enabled = false
+func (m *MineralDeposit) SetPosition(x float64, z float64) {
+	m.Location.X = x
+	m.Location.Z = z
 }
+
+/*
+Due to circular imports being the bane of my existence, modifications
+on this object are currently handled by the other impacting party
+(Miner or Collector)
+*/
+func (m *MineralDeposit) OnCollision(other physics.PhysicsObject) {}
 
 func (m *MineralDeposit) Draw(s *sdlmgr.SDLManager) {
-	if !m.enabled {
+	if !m.Enabled {
 		return
 	}
+
+	renderer := s.Renderer
+	pixPos := sdlmgr.FloatToPixelPos(m.Location)
+
+	//Mineral deposits are the closest I found to gold (#FFD700)
+	renderer.SetDrawColor(0xFF, 0xD7, 0x00, 0xFF)
+	renderer.FillRect(&sdl.Rect{
+		X: pixPos.X,
+		Y: pixPos.Z,
+		W: 20,
+		H: 20,
+	})
+	renderer.SetDrawColor(0x00, 0x00, 0x00, 0x00)
 }

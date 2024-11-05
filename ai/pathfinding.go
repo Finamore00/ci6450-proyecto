@@ -3,6 +3,7 @@ package ai
 import (
 	"ci6450-proyecto/mapa"
 	"ci6450-proyecto/movement"
+	"ci6450-proyecto/sdlmgr"
 	"ci6450-proyecto/vector"
 )
 
@@ -10,7 +11,7 @@ type PathFinding struct {
 	character  *movement.Kinematic
 	target     *vector.Vector
 	mapData    *mapa.Map
-	path       []vector.Vector
+	Path       []vector.Vector
 	currObjPos int //Position in path of the current node to go to
 }
 
@@ -22,7 +23,7 @@ func NewPathFinding(character *movement.Kinematic, mapData *mapa.Map, target *ve
 		character:  character,
 		target:     target,
 		mapData:    mapData,
-		path:       nil,
+		Path:       nil,
 		currObjPos: -1,
 	}
 }
@@ -32,8 +33,21 @@ Clears the currently found path. Intended to be used by smart agents
 when switching path-finding targets.
 */
 func (p *PathFinding) ClearPath() {
-	p.path = nil
+	p.Path = nil
 	p.currObjPos = -1
+}
+
+/*
+Sets a new target for the pathFinding struct. This will cause any path generated
+to the previous target to be cleared
+*/
+func (p *PathFinding) SetTarget(newGoal *vector.Vector) {
+	if p == nil {
+		return
+	}
+
+	p.target = newGoal
+	p.ClearPath()
 }
 
 /*
@@ -46,33 +60,54 @@ func (p *PathFinding) FollowPath() *movement.SteeringOutput {
 		return nil //can't pathfind with no map dummy
 	}
 
-	if p.path == nil {
+	if p.Path == nil {
 		//If path hasn't been calculated yet. Calculate it
-		p.path = p.mapData.FindPath(p.character.Position, *p.target)
-		p.currObjPos = len(p.path) - 1
+		p.Path = p.mapData.FindPath(p.character.Position, *p.target)
+		p.currObjPos = len(p.Path) - 1
 	}
 
 	//If already at goal node do nothing
 	currChNode := p.mapData.GetTileNode(p.character.Position)
 
 	//If we're already at the current target node, switch to the next node in the path
-	if currChNode == p.mapData.GetTileNode(p.path[p.currObjPos]) && p.currObjPos > 0 {
+	if currChNode == p.mapData.GetTileNode(p.Path[p.currObjPos]) && p.currObjPos > 0 {
 		p.currObjPos -= 1
 	}
 
 	//Build Seek target for steering output
 	stTgt := movement.Kinematic{
-		Position:    p.path[p.currObjPos],
+		Position:    p.Path[p.currObjPos],
 		Velocity:    vector.Vector{X: 0, Z: 0},
 		Orientation: 0,
 		Rotation:    0,
 	}
 
-	//If reaching the final point in the path, use Dynamic arrive instead of seek
-	if p.currObjPos == 0 {
-		return NewDynamicArriver(p.character, &stTgt).GetSteering()
-	}
-
 	return NewDynamicSeekFlee(p.character, &stTgt, true).GetSteering()
 
+}
+
+/*
+Draw the path from the path-finding entity to the goal
+*/
+func (p *PathFinding) Draw(s *sdlmgr.SDLManager) {
+	if p.Path == nil {
+		return
+	}
+
+	renderer := s.Renderer
+	renderer.SetDrawColor(0xFF, 0x00, 0x00, 0x00) //Paths are red
+
+	//Draw first line from character to current target
+	chPxPos := sdlmgr.FloatToPixelPos(&p.character.Position)
+	tgtPxPos := sdlmgr.FloatToPixelPos(&p.Path[p.currObjPos])
+	renderer.DrawLine(chPxPos.X, chPxPos.Z, tgtPxPos.X, tgtPxPos.Z)
+
+	//Draw all remaining lines till goal
+	for i := p.currObjPos; i > 0; i-- {
+		n1PxPos := sdlmgr.FloatToPixelPos(&p.Path[i])
+		n2PxPos := sdlmgr.FloatToPixelPos(&p.Path[i-1])
+		renderer.DrawLine(n1PxPos.X, n1PxPos.Z, n2PxPos.X, n2PxPos.Z)
+	}
+
+	renderer.SetDrawColor(0x00, 0x00, 0x00, 0x00)
 }

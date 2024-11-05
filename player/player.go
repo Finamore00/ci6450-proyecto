@@ -17,6 +17,34 @@ type Player struct {
 }
 
 /*
+Player constructor
+*/
+func New() *Player {
+	var newInstance Player
+
+	newInstance.Movement = &movement.Kinematic{
+		Position: vector.Vector{
+			X: 0.0,
+			Z: 0.0,
+		},
+		Velocity: vector.Vector{
+			X: 0.0,
+			Z: 0.0,
+		},
+		Orientation: 0.0,
+		Rotation:    0.0,
+	}
+
+	newInstance.collider = &physics.Collider{
+		Position: &newInstance.Movement.Position,
+		Width:    0.175, //Check player dimmensions later
+		Height:   0.175,
+	}
+
+	return &newInstance
+}
+
+/*
 Object interface implementation for player
 */
 
@@ -128,7 +156,7 @@ func (p *Player) Draw(s *sdlmgr.SDLManager) {
 
 	renderer.SetDrawColor(0xFF, 0xA5, 0x00, 0x00) //Player is orange
 	renderer.FillRect(&playerSprite)
-	renderer.SetDrawColor(0xFF, 0x00, 0x00, 0x00) //Orientation line is red
+	renderer.SetDrawColor(0x9D, 0x00, 0xFF, 0x00) //Orientation line is purple
 	renderer.DrawLine(
 		playerPos.X+7,
 		playerPos.Z+7,
@@ -137,32 +165,4 @@ func (p *Player) Draw(s *sdlmgr.SDLManager) {
 	)
 
 	renderer.SetDrawColor(0x00, 0x00, 0x00, 0x00)
-}
-
-/*
-Player constructor
-*/
-func New() *Player {
-	var newInstance Player
-
-	newInstance.Movement = &movement.Kinematic{
-		Position: vector.Vector{
-			X: 0.0,
-			Z: 0.0,
-		},
-		Velocity: vector.Vector{
-			X: 0.0,
-			Z: 0.0,
-		},
-		Orientation: 0.0,
-		Rotation:    0.0,
-	}
-
-	newInstance.collider = &physics.Collider{
-		Position: &newInstance.Movement.Position,
-		Width:    0.175, //Check player dimmensions later
-		Height:   0.175,
-	}
-
-	return &newInstance
 }

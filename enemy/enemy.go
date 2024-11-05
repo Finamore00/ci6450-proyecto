@@ -32,6 +32,10 @@ type Enemy struct {
 Object interface implementation for enemy
 */
 
+func (e *Enemy) GetType() physics.ObjectType {
+	return physics.ENEMY
+}
+
 func (e *Enemy) GetPosition() vector.Vector {
 	return e.Movement.Position
 }
@@ -44,7 +48,7 @@ func (e *Enemy) GetCollider() *physics.Collider {
 	return e.Collider
 }
 
-func (e *Enemy) OnCollision() {} //No collision behaviour defined yet
+func (e *Enemy) OnCollision(other physics.PhysicsObject) {} //No collision behaviour defined yet
 
 func (e *Enemy) Draw(s *sdlmgr.SDLManager) {
 	renderer := s.Renderer
@@ -61,9 +65,9 @@ func (e *Enemy) Draw(s *sdlmgr.SDLManager) {
 	orientationVector.Add(&e.Movement.Position)
 	orientationVectorPx := sdlmgr.FloatToPixelPos(orientationVector)
 
-	renderer.SetDrawColor(0x00, 0x00, 0xFF, 0x00) //Enemies are blue
+	renderer.SetDrawColor(0x00, 0x00, 0xFF, 0xFF) //Enemies are blue
 	renderer.FillRect(&enemySprite)
-	renderer.SetDrawColor(0xFF, 0x00, 0x00, 0x00) //Orientation line is red
+	renderer.SetDrawColor(0x9D, 0x00, 0xFF, 0xFF) //Orientation line is purple
 	renderer.DrawLine(
 		enemyPos.X+7,
 		enemyPos.Z+7,

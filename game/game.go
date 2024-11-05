@@ -1,7 +1,7 @@
 package game
 
 import (
-	"ci6450-proyecto/enemy"
+	"ci6450-proyecto/ai"
 	"ci6450-proyecto/mapa"
 	"ci6450-proyecto/movement"
 	"ci6450-proyecto/physics"
@@ -18,7 +18,8 @@ Holds all game state
 type GameManager struct {
 	Player   *player.Player
 	Map      *mapa.Map
-	Enemies  []*enemy.Enemy
+	Enemies  []ai.AutonomousEntity
+	Objects  []physics.PhysicsObject
 	Physics  *physics.PhysicsManager
 	Graphics *sdlmgr.SDLManager
 	Running  bool
@@ -33,7 +34,8 @@ func New() *GameManager {
 	instance.Player = player.New()
 	instance.Map = mapa.New(40, 20)
 	instance.Physics = physics.NewManager()
-	instance.Enemies = make([]*enemy.Enemy, 0, 25)
+	instance.Enemies = make([]ai.AutonomousEntity, 0, 25)
+	instance.Objects = make([]physics.PhysicsObject, 0, 25)
 	instance.Graphics = sdlmgr.New()
 	instance.Running = true
 
@@ -106,5 +108,8 @@ func (g *GameManager) UpdateGraphics() {
 
 	for _, e := range g.Enemies {
 		e.Draw(g.Graphics)
+	}
+	for _, o := range g.Objects {
+		o.Draw(g.Graphics)
 	}
 }

@@ -10,6 +10,7 @@ type ObjectType int32
 const (
 	WALL = iota
 	PLAYER
+	ENEMY
 	MINER
 	COLLECTER
 	MEDIC
@@ -23,5 +24,6 @@ type PhysicsObject interface {
 	GetVelocity() vector.Vector
 	GetCollider() *Collider
 	OnCollision(other PhysicsObject)
+	SetPosition(x float64, z float64)
 	Draw(sdl *sdlmgr.SDLManager)
 }
