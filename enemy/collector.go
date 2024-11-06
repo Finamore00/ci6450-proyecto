@@ -18,14 +18,15 @@ import (
 type Collector struct {
 	physics.PhysicsObject
 	ai.AutonomousEntity
-	Movement       *movement.Kinematic
-	collider       *physics.Collider
-	storage        *objects.MineralStorage
-	kart           *objects.DepositKart
-	pathFinding    *ai.PathFinding
-	loaded         bool
-	goingToKart    bool
-	goingToStorage bool
+	Movement         *movement.Kinematic
+	collider         *physics.Collider
+	storage          *objects.MineralStorage
+	kart             *objects.DepositKart
+	pathFinding      *ai.PathFinding
+	wanderingSteerer *ai.DynamicWander
+	loaded           bool
+	goingToKart      bool
+	goingToStorage   bool
 }
 
 func NewCollector(mapData *mapa.Map, kart *objects.DepositKart, storage *objects.MineralStorage) *Collector {
@@ -40,6 +41,7 @@ func NewCollector(mapData *mapa.Map, kart *objects.DepositKart, storage *objects
 	newInstance.kart = kart
 	newInstance.storage = storage
 	newInstance.pathFinding = ai.NewPathFinding(newInstance.Movement, mapData, kart.Position)
+	newInstance.wanderingSteerer = ai.NewDynamicWander(newInstance.Movement)
 	newInstance.loaded = false
 	newInstance.goingToKart = true
 	newInstance.goingToStorage = false
@@ -213,7 +215,7 @@ func (c *Collector) EnactBehaviour(dt float64) {
 		} else {
 			//Wander around
 			c.pathFinding.ClearPath()
-			c.Movement.Update(ai.NewDynamicWander(c.Movement).GetSteering(), dt)
+			c.Movement.Update(c.wanderingSteerer.GetSteering(), dt)
 		}
 	}
 }
