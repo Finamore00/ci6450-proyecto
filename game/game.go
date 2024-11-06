@@ -128,7 +128,9 @@ Updates all graphics on screen
 */
 func (g *GameManager) UpdateGraphics() {
 	g.Map.Draw(g.Graphics)
-	g.Player.Draw(g.Graphics)
+	if g.Player != nil {
+		g.Player.Draw(g.Graphics)
+	}
 
 	for _, e := range g.Enemies {
 		e.Draw(g.Graphics)

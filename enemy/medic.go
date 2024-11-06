@@ -41,7 +41,7 @@ func NewMedic(mapData *mapa.Map, waterSupply *objects.WaterSupply, miner *Miner)
 	}
 	newInstance.miner = miner
 	newInstance.waterSupply = waterSupply
-	newInstance.infirmaryPos = vector.New(9.5, 5.3)
+	newInstance.infirmaryPos = vector.New(-9.0, 5.0)
 	newInstance.pathFinding = ai.NewPathFinding(newInstance.Movement, mapData, newInstance.infirmaryPos)
 	newInstance.waterCount = 0
 	newInstance.goingToMiner = false
@@ -177,7 +177,7 @@ func (m *Medic) Draw(s *sdlmgr.SDLManager) {
 	orientationVector.Add(&m.Movement.Position)
 	orientationVectorPx := sdlmgr.FloatToPixelPos(orientationVector)
 
-	renderer.SetDrawColor(0x00, 0x00, 0x8B, 0xFF) //Medic is deep blue (#00008B)
+	renderer.SetDrawColor(0x00, 0xFF, 0xFF, 0xFF) //Medic is cyan (#00FFFF)
 	renderer.FillRect(&medicSprite)
 	renderer.SetDrawColor(0x9D, 0x00, 0xFF, 0xFF) //Orientation line is purple
 	renderer.DrawLine(

@@ -76,7 +76,7 @@ func (m *Map) Draw(s *sdlmgr.SDLManager) {
 	renderer.SetDrawColor(0x00, 0x00, 0x00, 0x00)
 
 	//Draw tiles
-	renderer.SetDrawColor(0x00, 0xFF, 0xFF, 0xFF) //Grid is cyan
+	renderer.SetDrawColor(0xD3, 0xD3, 0xD3, 0xFF) //Grid is light grey (#D3D3D3)
 	for i := -m.Width; i <= m.Width; i += m.tileWidth {
 		//Vertical lines
 		topPos := sdlmgr.FloatToPixelPos(vector.New(i, m.Height))
@@ -99,6 +99,13 @@ func (m *Map) Draw(s *sdlmgr.SDLManager) {
 			circleCenter := sdlmgr.FloatToPixelPos(&vector.Vector{X: i + tileWidthHf, Z: j + tileHeightHf})
 			gfx.FilledCircleRGBA(renderer, circleCenter.X, circleCenter.Z, 3, 0x76, 0xCD, 0x26, 0xFF)
 		}
+	}
+
+	//Draw occupied nodes, they are red
+	for k := range m.blockedTiles {
+		nodeCoord := m.GetNodeCoord(k)
+		circleCenter := sdlmgr.FloatToPixelPos(&nodeCoord)
+		gfx.FilledCircleRGBA(renderer, circleCenter.X, circleCenter.Z, 4, 0xFF, 0x00, 0x00, 0xFF)
 	}
 }
 
