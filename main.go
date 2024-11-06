@@ -22,6 +22,7 @@ func main() {
 	kart := objects.NewDepositKart()
 	deposit := objects.NewMineralDeposit()
 	storage := objects.NewMineralStorage()
+	waterSupply := objects.NewWaterSupply()
 
 	g.Objects = append(g.Objects, kart)
 	g.Objects[0].SetPosition(0.3, -4.7)
@@ -29,12 +30,16 @@ func main() {
 	g.Objects[1].SetPosition(7, -1)
 	g.Objects = append(g.Objects, storage)
 	g.Objects[2].SetPosition(-9.3, 5.0)
+	g.Objects = append(g.Objects, waterSupply)
+	g.Objects[3].SetPosition(0, 5.3)
 
 	//Set game characters
 	g.Enemies = append(g.Enemies, enemy.NewMiner(g.Map, kart, deposit))
 	g.Enemies[0].SetPosition(-4, -3.2)
 	g.Enemies = append(g.Enemies, enemy.NewCollector(g.Map, kart, storage))
 	g.Enemies[1].SetPosition(-8, -3.4)
+	g.Enemies = append(g.Enemies, enemy.NewMedic(g.Map, waterSupply, g.Enemies[0].(*enemy.Miner)))
+	g.Enemies[2].SetPosition(-1, 5)
 
 	//Register objects in physics manager
 	g.RegisterObjects()

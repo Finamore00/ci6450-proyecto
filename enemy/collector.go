@@ -88,7 +88,7 @@ func (c *Collector) OnCollision(other physics.PhysicsObject) {
 			c.loaded = false
 		}
 	case physics.WALL:
-		//Wall collisions
+		//Wall collisions. Eventually put this into its own function
 		cc := c.GetCollider()
 		wc := other.GetCollider()
 		const distDelta float64 = 0.015
@@ -212,6 +212,7 @@ func (c *Collector) EnactBehaviour(dt float64) {
 			c.Movement.Update(c.pathFinding.FollowPath(), dt)
 		} else {
 			//Wander around
+			c.pathFinding.ClearPath()
 			c.Movement.Update(ai.NewDynamicWander(c.Movement).GetSteering(), dt)
 		}
 	}
