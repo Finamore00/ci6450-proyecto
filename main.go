@@ -42,6 +42,7 @@ func main() {
 	g.Map.AddObstacle(&vector.Vector{X: -5, Z: 1.1}, 2.3, 0.5)
 	g.Map.AddObstacle(&vector.Vector{X: -5, Z: 1.1}, 0.5, 4.6)
 	g.Map.AddObstacle(&vector.Vector{X: -5, Z: -3}, 2.3, 0.5)
+	g.Map.AddObstacle(&vector.Vector{X: -4, Z: 2.2}, 0.5, 1.1)
 
 	g.Map.AddObstacle(&vector.Vector{X: -0.5, Z: 1.1}, 2.3, 0.5)
 	g.Map.AddObstacle(&vector.Vector{X: 1.3, Z: 1.1}, 0.5, 4.6)
@@ -59,7 +60,7 @@ func main() {
 	g.Objects = append(g.Objects, kart)
 	g.Objects[0].SetPosition(0.3, -4.7)
 	g.Objects = append(g.Objects, deposit)
-	g.Objects[1].SetPosition(2.2, -1)
+	g.Objects[1].SetPosition(5.1, 4.7)
 	g.Objects = append(g.Objects, storage)
 	g.Objects[2].SetPosition(-5.3, 5.0)
 	g.Objects = append(g.Objects, waterSupply)
@@ -67,11 +68,11 @@ func main() {
 
 	//Set game characters
 	g.Enemies = append(g.Enemies, enemy.NewMiner(g.Map, kart, deposit))
-	g.Enemies[0].SetPosition(-4, -4.3)
+	g.Enemies[0].SetPosition(-8.5, 1.7)
 	g.Enemies = append(g.Enemies, enemy.NewCollector(g.Map, kart, storage))
 	g.Enemies[1].SetPosition(-8, -3.4)
 	g.Enemies = append(g.Enemies, enemy.NewMedic(g.Map, waterSupply, g.Enemies[0].(*enemy.Miner)))
-	g.Enemies[2].SetPosition(-1, 5)
+	g.Enemies[2].SetPosition(-9, 5)
 
 	//Register objects in physics manager
 	g.RegisterObjects()
