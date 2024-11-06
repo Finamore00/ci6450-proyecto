@@ -93,9 +93,23 @@ func main() {
 		g.ProcessInput()
 		g.UpdatePlayer(float64(dt) / 1000)
 		g.UpdateEnemies(float64(dt) / 1000)
+		//Pañito caliente para el spawneo de minerales
+		if !deposit.Enabled && t-deposit.LastDisabled > 30000 {
+			//Choose random coordinates for the deposit
+			xCoord := RandomRangeF(-sdlmgr.MapWidth, sdlmgr.MapWidth)
+			zCoord := RandomRangeF(-sdlmgr.MapHeight, sdlmgr.MapHeight)
+			if g.Map.QueryTiles(vector.Vector{X: xCoord, Z: zCoord}, 0.4, 0.4) {
+				deposit.SetPosition(xCoord, zCoord)
+				deposit.Enabled = true
+			}
+		}
 		g.Physics.CheckCollisions()
 		g.Graphics.Clear()
 		g.UpdateGraphics()
 		g.Graphics.Render()
 	}
+}
+
+func RandomRangeF(a float64, b float64) float64 {
+	return a + rand.Float64()*(b-a)
 }

@@ -16,14 +16,14 @@ type MineralDeposit struct {
 	physics.PhysicsObject
 	Enabled      bool
 	Location     *vector.Vector
-	lastDisabled uint64
+	LastDisabled int64
 }
 
 func NewMineralDeposit() *MineralDeposit {
 	return &MineralDeposit{
 		Enabled:      true,
 		Location:     vector.New(0, 0),
-		lastDisabled: 0,
+		LastDisabled: 0,
 	}
 }
 

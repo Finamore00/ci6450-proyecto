@@ -304,3 +304,23 @@ func (m *Map) GetNodeCoord(t tileNode) vector.Vector {
 		Z: (-(float64(t.Z) * m.tileHeight) + m.Height) - (m.tileHeight / 2),
 	}
 }
+
+/*
+Function that recieves the position of a sprite along with its dimmensions
+and returns wether or not any space occupied by that object would be blocked
+*/
+func (m *Map) QueryTiles(position vector.Vector, width float64, height float64) bool {
+	topLeft := m.GetTileNode(position)
+	topRight := m.GetTileNode(*vector.New(position.X+width, position.Z))
+	bottomLeft := m.GetTileNode(*vector.New(position.X, position.Z-height))
+
+	for i := topLeft.X; i <= topRight.X; i++ {
+		for j := topLeft.Z; j <= bottomLeft.Z; j++ {
+			if m.blockedTiles[tileNode{X: i, Z: j}] {
+				return false
+			}
+		}
+	}
+
+	return true
+}

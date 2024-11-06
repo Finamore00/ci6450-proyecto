@@ -151,7 +151,7 @@ func (c *Collector) OnCollision(other physics.PhysicsObject) {
 					if c.Movement.Velocity.Z > 0 {
 						c.Movement.Velocity.Z = 0
 					}
-					c.Movement.Position.Z = cc.Position.Z - wc.Height - distDelta
+					c.Movement.Position.Z = wc.Position.Z - wc.Height - distDelta
 				}
 			}
 		}

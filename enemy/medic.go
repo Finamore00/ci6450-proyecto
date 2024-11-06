@@ -154,7 +154,7 @@ func (m *Medic) OnCollision(other physics.PhysicsObject) {
 					if m.Movement.Velocity.Z > 0 {
 						m.Movement.Velocity.Z = 0
 					}
-					m.Movement.Position.Z = mc.Position.Z - wc.Height - distDelta
+					m.Movement.Position.Z = wc.Position.Z - wc.Height - distDelta
 				}
 			}
 		}

@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -84,13 +85,16 @@ func (m *Miner) OnCollision(other physics.PhysicsObject) {
 	switch other.GetType() {
 	case physics.DEPOSIT:
 		//Collision with mineral deposit
-		// dp, ok := other.(*objects.MineralDeposit)
-		// if !ok {
-		// 	fmt.Fprintln(os.Stderr, "object isn't pointer to deposit.")
-		// 	return
-		// }
-		m.loaded = true
-		// dp.Enabled = false //Let's hope this works
+		dp, ok := other.(*objects.MineralDeposit)
+		if !ok {
+			fmt.Fprintln(os.Stderr, "object isn't pointer to deposit.")
+			return
+		}
+		if dp.Enabled && m.goingToDeposit {
+			m.loaded = true
+			dp.Enabled = false
+			dp.LastDisabled = time.Now().UnixMilli()
+		}
 	case physics.KART:
 		kp, ok := other.(*objects.DepositKart)
 		if !ok {
@@ -166,7 +170,7 @@ func (m *Miner) OnCollision(other physics.PhysicsObject) {
 					if m.Movement.Velocity.Z > 0 {
 						m.Movement.Velocity.Z = 0
 					}
-					m.Movement.Position.Z = mc.Position.Z - wc.Height - distDelta
+					m.Movement.Position.Z = wc.Position.Z - wc.Height - distDelta
 				}
 			}
 		}
