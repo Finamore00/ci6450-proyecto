@@ -38,11 +38,12 @@ agua para atenderlo, va a buscar más botellas de agua al almacén de agua (caja
 El proyecto está escrito en Golang (>=1.22.7) haciendo uso de los bindings a SDL2 obtenidos del repo `github.com/veandco/go-sdl2`. El proyecto fue desarrollado y
 probado en Fedora Linux versión 40/41 haciendo uso del sistema de gráficos Wayland. Para poder compilar los bindings de los que depende el proyecto dicho sistema debe
 tener instalados los siguientes paquetes (O sus equivalentes en otras distribuciones):
-    * SDL2-devel (32 y 64 bits)
-    * SDL2_image-devel (32 y 64 bits)
-    * SDL2_gfx-devel (32 y 64 bits)
-    * Grupo de paquetes "Development Tools" (recomendado)
-    * Grupo de paquetes "C Development Tools and Libraries" (recomendado)
+
+* SDL2-devel (32 y 64 bits)
+* SDL2_image-devel (32 y 64 bits)
+* SDL2_gfx-devel (32 y 64 bits)
+* Grupo de paquetes "Development Tools" (recomendado)
+* Grupo de paquetes "C Development Tools and Libraries" (recomendado)
 
 Para compilar el proyecto a un ejecutable se puede ejecutar el siguiente comando:
 ```
