@@ -51,6 +51,9 @@ func main() {
 	g.Map.AddObstacle(&vector.Vector{X: -7.75, Z: -0.15}, 2.75, 0.5)
 	g.Map.AddObstacle(&vector.Vector{X: -sdlmgr.MapWidth, Z: -2.5}, 3.2, 0.5)
 
+	g.Map.AddOxygenBubble(vector.Vector{X: 3.0, Z: -2.5}, 3.0)
+	g.Map.AddMudSpot(vector.Vector{X: -3.0, Z: 2.1}, 2.3, 4.0)
+
 	//Set game objects
 	kart := objects.NewDepositKart()
 	deposit := objects.NewMineralDeposit()

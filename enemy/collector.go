@@ -18,15 +18,16 @@ import (
 type Collector struct {
 	physics.PhysicsObject
 	ai.AutonomousEntity
-	Movement         *movement.Kinematic
-	collider         *physics.Collider
-	storage          *objects.MineralStorage
-	kart             *objects.DepositKart
-	pathFinding      *ai.PathFinding
-	wanderingSteerer *ai.DynamicWander
-	loaded           bool
-	goingToKart      bool
-	goingToStorage   bool
+	Movement            *movement.Kinematic
+	collider            *physics.Collider
+	storage             *objects.MineralStorage
+	kart                *objects.DepositKart
+	pathFinding         *ai.PathFinding
+	tacticalPathFinding *ai.PathFinding
+	wanderingSteerer    *ai.DynamicWander
+	loaded              bool
+	goingToKart         bool
+	goingToStorage      bool
 }
 
 func NewCollector(mapData *mapa.Map, kart *objects.DepositKart, storage *objects.MineralStorage) *Collector {
@@ -40,7 +41,8 @@ func NewCollector(mapData *mapa.Map, kart *objects.DepositKart, storage *objects
 	}
 	newInstance.kart = kart
 	newInstance.storage = storage
-	newInstance.pathFinding = ai.NewPathFinding(newInstance.Movement, mapData, kart.Position)
+	newInstance.pathFinding = ai.NewPathFinding(newInstance.Movement, mapData, kart.Position, 0, 0)
+	newInstance.tacticalPathFinding = ai.NewPathFinding(newInstance.Movement, mapData, kart.Position, 0, 0)
 	newInstance.wanderingSteerer = ai.NewDynamicWander(newInstance.Movement)
 	newInstance.loaded = false
 	newInstance.goingToKart = true
@@ -157,6 +159,12 @@ func (c *Collector) OnCollision(other physics.PhysicsObject) {
 				}
 			}
 		}
+	case physics.MUDSPOT:
+		c.Movement.Velocity.ScalarDiv(2.0)
+		if c.Movement.Velocity.Norm() < movement.MaxVelocity/2 {
+			c.Movement.Velocity.Normalize()
+			c.Movement.Velocity.ScalarMult(movement.MaxVelocity / 2)
+		}
 	default:
 	}
 }
@@ -188,7 +196,9 @@ func (c *Collector) Draw(s *sdlmgr.SDLManager) {
 
 	renderer.SetDrawColor(0x00, 0x00, 0x00, 0x00)
 
-	c.pathFinding.Draw(s) //Draw path
+	//Draw paths
+	c.pathFinding.Draw(s, false)
+	c.tacticalPathFinding.Draw(s, true)
 }
 
 /*
@@ -199,22 +209,27 @@ func (c *Collector) EnactBehaviour(dt float64) {
 		//If carrying a load. Take it to storage
 		if !c.goingToStorage {
 			c.pathFinding.SetTarget(c.storage.Position)
+			c.tacticalPathFinding.SetTarget(c.storage.Position)
 			c.goingToStorage = true
 			c.goingToKart = false
 		}
-		c.Movement.Update(c.pathFinding.FollowPath(), dt)
+		c.pathFinding.FollowPath()
+		c.Movement.Update(c.tacticalPathFinding.FollowPath(), dt)
 	} else {
 		//If kart has ore, go get it
 		if c.kart.Load > 0 {
 			if !c.goingToKart {
 				c.pathFinding.SetTarget(c.kart.Position)
+				c.tacticalPathFinding.SetTarget(c.kart.Position)
 				c.goingToKart = true
 				c.goingToStorage = false
 			}
-			c.Movement.Update(c.pathFinding.FollowPath(), dt)
+			c.pathFinding.FollowPath()
+			c.Movement.Update(c.tacticalPathFinding.FollowPath(), dt)
 		} else {
 			//Wander around
 			c.pathFinding.ClearPath()
+			c.tacticalPathFinding.ClearPath()
 			c.Movement.Update(c.wanderingSteerer.GetSteering(), dt)
 		}
 	}

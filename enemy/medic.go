@@ -18,16 +18,17 @@ import (
 type Medic struct {
 	physics.PhysicsObject
 	ai.AutonomousEntity
-	Movement           *movement.Kinematic
-	collider           *physics.Collider
-	miner              *Miner
-	waterSupply        *objects.WaterSupply
-	infirmaryPos       *vector.Vector
-	pathFinding        *ai.PathFinding
-	waterCount         uint8
-	goingToMiner       bool
-	goingToWaterSupply bool
-	goingToInfirmary   bool
+	Movement            *movement.Kinematic
+	collider            *physics.Collider
+	miner               *Miner
+	waterSupply         *objects.WaterSupply
+	infirmaryPos        *vector.Vector
+	pathFinding         *ai.PathFinding
+	tacticalPathFinding *ai.PathFinding
+	waterCount          uint8
+	goingToMiner        bool
+	goingToWaterSupply  bool
+	goingToInfirmary    bool
 }
 
 func NewMedic(mapData *mapa.Map, waterSupply *objects.WaterSupply, miner *Miner) *Medic {
@@ -42,7 +43,8 @@ func NewMedic(mapData *mapa.Map, waterSupply *objects.WaterSupply, miner *Miner)
 	newInstance.miner = miner
 	newInstance.waterSupply = waterSupply
 	newInstance.infirmaryPos = vector.New(-9.0, 5.0)
-	newInstance.pathFinding = ai.NewPathFinding(newInstance.Movement, mapData, newInstance.infirmaryPos)
+	newInstance.pathFinding = ai.NewPathFinding(newInstance.Movement, mapData, newInstance.infirmaryPos, 0, 0)
+	newInstance.tacticalPathFinding = ai.NewPathFinding(newInstance.Movement, mapData, newInstance.infirmaryPos, 15, 0)
 	newInstance.waterCount = 0
 	newInstance.goingToMiner = false
 	newInstance.goingToWaterSupply = false
@@ -158,6 +160,12 @@ func (m *Medic) OnCollision(other physics.PhysicsObject) {
 				}
 			}
 		}
+	case physics.MUDSPOT:
+		m.Movement.Velocity.ScalarDiv(2.0)
+		if m.Movement.Velocity.Norm() < movement.MaxVelocity/2 {
+			m.Movement.Velocity.Normalize()
+			m.Movement.Velocity.ScalarMult(movement.MaxVelocity / 2)
+		}
 	default:
 	}
 }
@@ -189,7 +197,9 @@ func (m *Medic) Draw(s *sdlmgr.SDLManager) {
 
 	renderer.SetDrawColor(0x00, 0x00, 0x00, 0x00)
 
-	m.pathFinding.Draw(s) //Draw path
+	//Draw paths
+	m.pathFinding.Draw(s, false)
+	m.tacticalPathFinding.Draw(s, true)
 }
 
 /*
@@ -201,6 +211,7 @@ func (m *Medic) EnactBehaviour(dt float64) {
 	if m.miner.stamina > 0 {
 		if !m.goingToInfirmary {
 			m.pathFinding.SetTarget(m.infirmaryPos)
+			m.tacticalPathFinding.SetTarget(m.infirmaryPos)
 			m.goingToInfirmary = true
 			m.goingToMiner = false
 			m.goingToWaterSupply = false
@@ -208,28 +219,34 @@ func (m *Medic) EnactBehaviour(dt float64) {
 		//If close enough to infirmary location don't keep following
 		if vector.Minus(&m.Movement.Position, m.infirmaryPos).Norm() < 0.5 {
 			m.pathFinding.ClearPath()
+			m.tacticalPathFinding.ClearPath()
 			return
 		}
-		m.Movement.Update(m.pathFinding.FollowPath(), dt)
+		m.pathFinding.FollowPath()
+		m.Movement.Update(m.tacticalPathFinding.FollowPath(), dt)
 	} else {
 		//If no water on stock, go to water supply
 		if m.waterCount == 0 {
 			if !m.goingToWaterSupply {
 				m.pathFinding.SetTarget(m.waterSupply.Position)
+				m.tacticalPathFinding.SetTarget(m.waterSupply.Position)
 				m.goingToWaterSupply = true
 				m.goingToInfirmary = false
 				m.goingToMiner = false
 			}
-			m.Movement.Update(m.pathFinding.FollowPath(), dt)
+			m.pathFinding.FollowPath()
+			m.Movement.Update(m.tacticalPathFinding.FollowPath(), dt)
 		} else {
 			//Go tend the miner
 			if !m.goingToMiner {
 				m.pathFinding.SetTarget(&m.miner.Movement.Position)
+				m.tacticalPathFinding.SetTarget(&m.miner.Movement.Position)
 				m.goingToMiner = true
 				m.goingToInfirmary = false
 				m.goingToWaterSupply = false
 			}
-			m.Movement.Update(m.pathFinding.FollowPath(), dt)
+			m.pathFinding.FollowPath()
+			m.Movement.Update(m.tacticalPathFinding.FollowPath(), dt)
 		}
 	}
 }

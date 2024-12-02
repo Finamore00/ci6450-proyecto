@@ -13,11 +13,15 @@ import (
 
 type Map struct {
 	obstacles    []*objects.RegularObstacle
+	mudSpots     []*objects.MudSpot
+	bubbles      []*objects.OxygenBubble
 	tileCols     int
 	tileRows     int
 	tileWidth    float64
 	tileHeight   float64
 	blockedTiles map[tileNode]bool
+	mudTiles     map[tileNode]int
+	bubbleTiles  map[tileNode]int
 	Width        float64
 	Height       float64 //Think later if width and height should be here
 }
@@ -25,11 +29,15 @@ type Map struct {
 func New(tileColumns int, tileRows int) *Map {
 	newInstance := Map{
 		obstacles:    make([]*objects.RegularObstacle, 0, 10),
+		mudSpots:     make([]*objects.MudSpot, 0, 10),
+		bubbles:      make([]*objects.OxygenBubble, 0, 10), //It's ugly as sin but I don't care at this point man
 		tileWidth:    (sdlmgr.MapWidth * 2) / float64(tileColumns),
 		tileHeight:   (sdlmgr.MapHeight * 2) / float64(tileRows),
 		tileCols:     tileColumns,
 		tileRows:     tileRows,
 		blockedTiles: make(map[tileNode]bool),
+		mudTiles:     make(map[tileNode]int),
+		bubbleTiles:  make(map[tileNode]int),
 		Width:        sdlmgr.MapWidth,
 		Height:       sdlmgr.MapHeight, //Eventually take out MapWidth and MapHeight out of sdlmgr
 	}
@@ -53,6 +61,51 @@ func (m *Map) AddObstacle(position *vector.Vector, width float64, height float64
 
 }
 
+func (m *Map) AddMudSpot(position vector.Vector, width float64, height float64) {
+	m.mudSpots = append(m.mudSpots, objects.NewMudSpot(position, width, height))
+
+	//Set tilegraph nodes that are now muddy
+	tlNode := m.GetTileNode(position)
+	brNode := m.GetTileNode(vector.Vector{X: position.X + width, Z: position.Z - height})
+
+	for i := tlNode.X; i <= brNode.X; i++ {
+		for j := tlNode.Z; j <= brNode.Z; j++ {
+			m.mudTiles[tileNode{X: i, Z: j}] = 1
+		}
+	}
+}
+
+func (m *Map) AddOxygenBubble(position vector.Vector, radius float64) {
+	m.bubbles = append(m.bubbles, objects.NewOxygenBubble(position.X, position.Z, radius))
+
+	//Set tilegraph nodes that are now oxygen rich
+
+	//Find bubble's circumscribed square
+	sideLen := radius * 2
+	helperAngleTl := (3 * math.Pi) / 4
+	helperAngleBr := (7 * math.Pi) / 4
+	auxRad := (sideLen * math.Sqrt2) / 2
+
+	brCorner := m.GetTileNode(vector.Vector{
+		X: position.X + auxRad*math.Sin(helperAngleTl),
+		Z: position.Z + auxRad*math.Cos(helperAngleTl),
+	})
+	tlCorner := m.GetTileNode(vector.Vector{
+		X: position.X + auxRad*math.Sin(helperAngleBr),
+		Z: position.Z + auxRad*math.Cos(helperAngleBr),
+	})
+
+	for i := tlCorner.X; i <= brCorner.X; i++ {
+		for j := tlCorner.Z; j <= brCorner.Z; j++ {
+			nodeCoord := m.GetNodeCoord(tileNode{X: i, Z: j})
+			dist := vector.Minus(&position, &nodeCoord).Norm()
+			if dist <= radius {
+				m.bubbleTiles[tileNode{X: i, Z: j}] = 1
+			}
+		}
+	}
+}
+
 func (m *Map) RegisterObjects(p *physics.PhysicsManager) {
 	if p == nil {
 		return
@@ -60,6 +113,14 @@ func (m *Map) RegisterObjects(p *physics.PhysicsManager) {
 
 	for _, e := range m.obstacles {
 		p.RegisterObject(e)
+	}
+
+	for _, mud := range m.mudSpots {
+		p.RegisterObject(mud)
+	}
+
+	for _, b := range m.bubbles {
+		p.RegisterObject(b)
 	}
 }
 
@@ -71,6 +132,14 @@ func (m *Map) Draw(s *sdlmgr.SDLManager) {
 	//Draw obstacles
 	for _, o := range m.obstacles {
 		o.Draw(s)
+	}
+
+	for _, mud := range m.mudSpots {
+		mud.Draw(s)
+	}
+
+	for _, b := range m.bubbles {
+		b.Draw(s)
 	}
 
 	renderer.SetDrawColor(0x00, 0x00, 0x00, 0x00)
@@ -99,6 +168,19 @@ func (m *Map) Draw(s *sdlmgr.SDLManager) {
 			circleCenter := sdlmgr.FloatToPixelPos(&vector.Vector{X: i + tileWidthHf, Z: j + tileHeightHf})
 			gfx.FilledCircleRGBA(renderer, circleCenter.X, circleCenter.Z, 3, 0x76, 0xCD, 0x26, 0xFF)
 		}
+	}
+
+	for n := range m.mudTiles {
+		nodeCoord := m.GetNodeCoord(n)
+		circleCenter := sdlmgr.FloatToPixelPos(&nodeCoord)
+		gfx.FilledCircleRGBA(renderer, circleCenter.X, circleCenter.Z, 4, 0xCC, 0x88, 0x99, 0xFF)
+
+	}
+
+	for b := range m.bubbleTiles {
+		nodeCoord := m.GetNodeCoord(b)
+		circleCenter := sdlmgr.FloatToPixelPos(&nodeCoord)
+		gfx.FilledCircleRGBA(renderer, circleCenter.X, circleCenter.Z, 4, 0xFF, 0xBF, 0x00, 0xFF)
 	}
 
 	//Draw occupied nodes, they are red
@@ -140,7 +222,7 @@ const diagCost int = 30
 Given a tileNode, returns a slice of connections containing all connections to its
 neighboring nodes
 */
-func (m *Map) getConnections(node tileNode) []connection {
+func (m *Map) getConnections(node tileNode, mudWeight int, bubbleWeight int) []connection {
 	connections := make([]connection, 0, 8) //Any node can have at most 8 neighbors
 
 	for h := -1; h <= 1; h++ {
@@ -174,6 +256,8 @@ func (m *Map) getConnections(node tileNode) []connection {
 				cost = cardCost
 			}
 
+			cost += mudWeight*m.mudTiles[destNode] + bubbleWeight*m.bubbleTiles[destNode]
+
 			connections = append(connections, connection{from: node, to: destNode, cost: cost})
 		}
 	}
@@ -185,7 +269,7 @@ Given two points in the game map, finds a path between start and end using A*.
 For performance reasons the returned path is reversed, so to go from start to
 goal it must be followed in reverse.
 */
-func (m *Map) FindPath(start vector.Vector, end vector.Vector) []vector.Vector {
+func (m *Map) FindPath(start vector.Vector, end vector.Vector, mudWeight int, bubbleWeight int) []vector.Vector {
 
 	//Discretize inputted locations
 	stNode := m.GetTileNode(start)
@@ -259,7 +343,7 @@ func (m *Map) FindPath(start vector.Vector, end vector.Vector) []vector.Vector {
 		open[currPos] = open[len(open)-1]
 		open = open[:len(open)-1]
 
-		for _, conn := range m.getConnections(current) {
+		for _, conn := range m.getConnections(current, mudWeight, bubbleWeight) {
 			neighbor := conn.to
 			gScoreCandidate := gScore[current] + conn.cost
 			if currGScore, hasGScore := gScore[neighbor]; !hasGScore || gScoreCandidate < currGScore {

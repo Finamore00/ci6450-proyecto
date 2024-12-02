@@ -312,7 +312,7 @@ func NewPathFinder(mapData *mapa.Map, target *vector.Vector) *Enemy {
 		Height:   14, //Remember to correct these :)
 	}
 	newInstance.steeringBehaviourData = nil
-	newInstance.pathfinderData = ai.NewPathFinding(newInstance.Movement, mapData, target)
+	newInstance.pathfinderData = ai.NewPathFinding(newInstance.Movement, mapData, target, 0, 0)
 
 	return &newInstance
 }

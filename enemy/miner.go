@@ -25,15 +25,17 @@ move until the Medic tends to him.
 type Miner struct {
 	physics.PhysicsObject
 	ai.AutonomousEntity
-	Movement       *movement.Kinematic
-	Collider       *physics.Collider
-	deposit        *objects.MineralDeposit
-	kart           *objects.DepositKart
-	pathFinding    *ai.PathFinding
-	loaded         bool
-	goingToDeposit bool //Flags
-	goingToKart    bool //Flags
-	stamina        float64
+	Movement            *movement.Kinematic
+	Collider            *physics.Collider
+	deposit             *objects.MineralDeposit
+	kart                *objects.DepositKart
+	pathFinding         *ai.PathFinding
+	tacticalPathFinding *ai.PathFinding
+	loaded              bool
+	goingToDeposit      bool //Flags
+	goingToKart         bool //Flags
+	underBubble         bool
+	stamina             float64
 }
 
 func NewMiner(mapData *mapa.Map, kart *objects.DepositKart, deposit *objects.MineralDeposit) *Miner {
@@ -47,10 +49,12 @@ func NewMiner(mapData *mapa.Map, kart *objects.DepositKart, deposit *objects.Min
 	}
 	newInstance.deposit = deposit
 	newInstance.kart = kart
-	newInstance.pathFinding = ai.NewPathFinding(newInstance.Movement, mapData, deposit.Location)
+	newInstance.pathFinding = ai.NewPathFinding(newInstance.Movement, mapData, deposit.Location, 0, 0)
+	newInstance.tacticalPathFinding = ai.NewPathFinding(newInstance.Movement, mapData, deposit.Location, 20, -15)
 	newInstance.loaded = false
 	newInstance.goingToDeposit = true
 	newInstance.goingToKart = false
+	newInstance.underBubble = false
 	newInstance.stamina = 1.0
 
 	return &newInstance
@@ -174,6 +178,14 @@ func (m *Miner) OnCollision(other physics.PhysicsObject) {
 				}
 			}
 		}
+	case physics.OXYGENBUBBLE:
+		m.underBubble = true
+	case physics.MUDSPOT:
+		m.Movement.Velocity.ScalarDiv(2.0)
+		if m.Movement.Velocity.Norm() < movement.MaxVelocity/2 {
+			m.Movement.Velocity.Normalize()
+			m.Movement.Velocity.ScalarMult(movement.MaxVelocity / 2)
+		}
 	default:
 	}
 }
@@ -205,7 +217,9 @@ func (m *Miner) Draw(s *sdlmgr.SDLManager) {
 
 	renderer.SetDrawColor(0x00, 0x00, 0x00, 0x00)
 
-	m.pathFinding.Draw(s) //Draw path
+	//Draw paths
+	m.pathFinding.Draw(s, false)
+	m.tacticalPathFinding.Draw(s, true)
 }
 
 /*
@@ -223,21 +237,31 @@ func (m *Miner) EnactBehaviour(dt float64) {
 		if !m.goingToKart {
 			//First calculation of the path to the kart
 			m.pathFinding.SetTarget(m.kart.Position)
+			m.tacticalPathFinding.SetTarget(m.kart.Position)
 			m.goingToKart = true
 			m.goingToDeposit = false
 		}
-		m.Movement.Update(m.pathFinding.FollowPath(), dt)
-		m.stamina -= 0.0001
+		m.pathFinding.FollowPath()
+		m.Movement.Update(m.tacticalPathFinding.FollowPath(), dt)
+		if !m.underBubble {
+			m.stamina -= 0.0001
+		}
+		m.underBubble = false
 	} else {
 		//If deposit is active go towards it
 		if m.deposit.Enabled {
 			if !m.goingToDeposit {
 				m.pathFinding.SetTarget(m.deposit.Location)
+				m.tacticalPathFinding.SetTarget(m.deposit.Location)
 				m.goingToDeposit = true
 				m.goingToKart = false
 			}
-			m.Movement.Update(m.pathFinding.FollowPath(), dt)
-			m.stamina -= 0.0001
+			m.pathFinding.FollowPath()
+			m.Movement.Update(m.tacticalPathFinding.FollowPath(), dt)
+			if !m.underBubble {
+				m.stamina -= 0.0001
+			}
+			m.underBubble = false
 		} else {
 			//If no mineral deposit is available do nothing
 			return

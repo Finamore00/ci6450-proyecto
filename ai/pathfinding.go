@@ -8,23 +8,27 @@ import (
 )
 
 type PathFinding struct {
-	character  *movement.Kinematic
-	target     *vector.Vector
-	mapData    *mapa.Map
-	Path       []vector.Vector
-	currObjPos int //Position in path of the current node to go to
+	character    *movement.Kinematic
+	target       *vector.Vector
+	mapData      *mapa.Map
+	Path         []vector.Vector
+	mudWeight    int
+	bubbleWeight int
+	currObjPos   int //Position in path of the current node to go to
 }
 
 /*
 Constructor for PathFinding struct
 */
-func NewPathFinding(character *movement.Kinematic, mapData *mapa.Map, target *vector.Vector) *PathFinding {
+func NewPathFinding(character *movement.Kinematic, mapData *mapa.Map, target *vector.Vector, mudWeight int, bubbleWeight int) *PathFinding {
 	return &PathFinding{
-		character:  character,
-		target:     target,
-		mapData:    mapData,
-		Path:       nil,
-		currObjPos: -1,
+		character:    character,
+		target:       target,
+		mapData:      mapData,
+		Path:         nil,
+		mudWeight:    mudWeight,
+		bubbleWeight: bubbleWeight,
+		currObjPos:   -1,
 	}
 }
 
@@ -62,7 +66,7 @@ func (p *PathFinding) FollowPath() *movement.SteeringOutput {
 
 	if p.Path == nil {
 		//If path hasn't been calculated yet. Calculate it
-		p.Path = p.mapData.FindPath(p.character.Position, *p.target)
+		p.Path = p.mapData.FindPath(p.character.Position, *p.target, p.mudWeight, p.bubbleWeight)
 		p.currObjPos = len(p.Path) - 1
 	}
 
@@ -89,13 +93,17 @@ func (p *PathFinding) FollowPath() *movement.SteeringOutput {
 /*
 Draw the path from the path-finding entity to the goal
 */
-func (p *PathFinding) Draw(s *sdlmgr.SDLManager) {
+func (p *PathFinding) Draw(s *sdlmgr.SDLManager, tactical bool) {
 	if p.Path == nil {
 		return
 	}
 
 	renderer := s.Renderer
-	renderer.SetDrawColor(0xFF, 0x00, 0x00, 0x00) //Paths are red
+	if !tactical {
+		renderer.SetDrawColor(0xFF, 0x00, 0x00, 0xFF) //Paths are red
+	} else {
+		renderer.SetDrawColor(0xE4, 0xCB, 0xFF, 0xFF)
+	}
 
 	//Draw first line from character to current target
 	chPxPos := sdlmgr.FloatToPixelPos(&p.character.Position)

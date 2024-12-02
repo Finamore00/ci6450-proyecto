@@ -18,6 +18,8 @@ const (
 	KART
 	STORAGE
 	WATER
+	OXYGENBUBBLE
+	MUDSPOT
 )
 
 type PhysicsObject interface {
