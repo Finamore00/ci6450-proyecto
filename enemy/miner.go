@@ -264,6 +264,8 @@ func (m *Miner) EnactBehaviour(dt float64) {
 			m.underBubble = false
 		} else {
 			//If no mineral deposit is available do nothing
+			m.pathFinding.ClearPath()
+			m.tacticalPathFinding.ClearPath()
 			return
 		}
 	}

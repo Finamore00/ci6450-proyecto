@@ -51,8 +51,15 @@ func main() {
 	g.Map.AddObstacle(&vector.Vector{X: -7.75, Z: -0.15}, 2.75, 0.5)
 	g.Map.AddObstacle(&vector.Vector{X: -sdlmgr.MapWidth, Z: -2.5}, 3.2, 0.5)
 
-	g.Map.AddOxygenBubble(vector.Vector{X: 3.0, Z: -2.5}, 3.0)
-	g.Map.AddMudSpot(vector.Vector{X: -3.0, Z: 2.1}, 2.3, 4.0)
+	//Tactical stuffs
+	g.Map.AddMudSpot(vector.Vector{X: -3.8, Z: 0.4}, 3.2, 2.8)
+	g.Map.AddMudSpot(vector.Vector{X: -1.9, Z: 0.8}, 0.7, 0.45)
+	g.Map.AddMudSpot(vector.Vector{X: -1.5, Z: 2.7}, 0.95, 0.9)
+
+	g.Map.AddOxygenBubble(vector.Vector{X: 6.6, Z: 2.4}, 1.1)
+	g.Map.AddOxygenBubble(vector.Vector{X: 3.1, Z: -5.4}, 1.5)
+	g.Map.AddOxygenBubble(vector.Vector{X: -7.1, Z: -4.48}, 1.7)
+	g.Map.AddOxygenBubble(vector.Vector{X: 2.7, Z: 3.36}, 1.3)
 
 	//Set game objects
 	kart := objects.NewDepositKart()
