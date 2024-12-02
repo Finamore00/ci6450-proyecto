@@ -227,6 +227,8 @@ ai.AutonomousEntity implementation. Consists on the miner's decision tree
 */
 func (m *Miner) EnactBehaviour(dt float64) {
 
+	m.pathFinding.ClearPath()
+
 	if m.stamina <= 0 {
 		//If exhausted, do nothing
 		return

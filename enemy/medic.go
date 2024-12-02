@@ -207,6 +207,8 @@ ai.AutonomousEntity interface implementation. Consists on the
 character's behaviour tree
 */
 func (m *Medic) EnactBehaviour(dt float64) {
+
+	m.pathFinding.ClearPath()
 	//If miner isn't tired. Return to the infirmary
 	if m.miner.stamina > 0 {
 		if !m.goingToInfirmary {

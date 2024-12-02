@@ -205,6 +205,8 @@ func (c *Collector) Draw(s *sdlmgr.SDLManager) {
 ai.AutonomousEntity interface implementatio. Corresponds to the characters decision tree
 */
 func (c *Collector) EnactBehaviour(dt float64) {
+
+	c.pathFinding.ClearPath()
 	if c.loaded {
 		//If carrying a load. Take it to storage
 		if !c.goingToStorage {
